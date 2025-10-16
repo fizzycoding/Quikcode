@@ -1,5 +1,5 @@
 # This is a config for E2B sandbox template.
-# You can use template ID (w35uc9s47m4xgrz1eyyg) or template name (quikcode-nextjs-test2) to create a sandbox:
+# You can use template ID (go8b6rlcg4drieda3iyd) or template name (quikcode-nextjs-test2) to create a sandbox:
 
 # Python SDK
 # from e2b import Sandbox, AsyncSandbox
@@ -14,4 +14,4 @@ team_id = "1ec54fc9-a8fe-42e3-9689-136c259c4510"
 start_cmd = "/compile_page.sh"
 dockerfile = "e2b.Dockerfile"
 template_name = "quikcode-nextjs-test2"
-template_id = "w35uc9s47m4xgrz1eyyg"
+template_id = "go8b6rlcg4drieda3iyd"
