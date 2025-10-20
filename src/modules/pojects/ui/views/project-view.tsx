@@ -5,7 +5,7 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import MessageContainer from "../components/messages-container";
-import { Suspense, useState } from "react";
+import { useState } from "react";
 import { Fragment } from "@/generated/prisma";
 import ProjectHeader from "../components/project-header";
 import FragmentWeb from "../components/fragment-web";
@@ -13,10 +13,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CodeIcon, CrownIcon, EyeIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { CodeView } from "@/components/code-theme";
 import { FileExplorer } from "@/components/filex-explorer";
 import { UserControl } from "@/components/user-control";
 import { useAuth } from "@clerk/nextjs";
+import { AsyncWrapper } from "@/components/async-wrapper";
+import ProjectLoadingFallback from "../components/project-loading-fallback";
+import MessageLoadingFallback from "../components/message-loading-fallback";
+import MessageErrorFallback from "../components/message-error-fallback";
+import ProjectErrorFallback from "../components/project-error-fallback";
 
 interface Props {
   projectId: string;
@@ -25,7 +29,6 @@ interface Props {
 const ProjectView = ({ projectId }: Props) => {
   const { has } = useAuth();
   const hasPro = has?.({ plan: "pro" });
-
   const [activeFragment, setActiveFragment] = useState<Fragment | null>(null);
   const [tabState, setTabState] = useState<"preview" | "code">("preview");
   return (
@@ -36,16 +39,23 @@ const ProjectView = ({ projectId }: Props) => {
           minSize={20}
           className="flex flex-col min-h-0"
         >
-          <Suspense fallback={<p>Loading...</p>}>
+          <AsyncWrapper
+            fallback={<ProjectLoadingFallback />}
+            errorFallback={<ProjectErrorFallback />}
+          >
             <ProjectHeader projectId={projectId} />
-          </Suspense>
-          <Suspense fallback={<p>Loading...</p>}>
+          </AsyncWrapper>
+
+          <AsyncWrapper
+            fallback={<MessageLoadingFallback />}
+            errorFallback={<MessageErrorFallback />}
+          >
             <MessageContainer
               projectId={projectId}
               activeFragment={activeFragment}
               setActiveFragment={setActiveFragment}
             />
-          </Suspense>
+          </AsyncWrapper>
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={65} minSize={50}>
