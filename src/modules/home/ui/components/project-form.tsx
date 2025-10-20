@@ -15,6 +15,9 @@ import { Form, FormField } from "@/components/ui/form";
 import { useRouter } from "next/navigation";
 import { PROJECT_TEMPLATES } from "../../constants";
 import ProjectList from "./project-list";
+import { useClerk } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
+import { useCurrentTheme } from "@/hooks/use-current-theme";
 
 const formSchema = z.object({
   value: z
@@ -24,6 +27,8 @@ const formSchema = z.object({
 });
 
 const ProjectForm = () => {
+  const curTheme = useCurrentTheme();
+  const clerk = useClerk();
   const [isFocused, setIsFocused] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -44,6 +49,16 @@ const ProjectForm = () => {
 
       onError: (error) => {
         toast.error(error.message);
+        if (error.data?.code === "UNAUTHORIZED") {
+          clerk.openSignIn({
+            appearance: {
+              baseTheme: curTheme === "dark" ? dark : undefined,
+              elements: {
+                cardBox: "border! rounded-lg",
+              },
+            },
+          });
+        }
       },
     })
   );
