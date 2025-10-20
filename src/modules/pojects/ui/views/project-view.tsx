@@ -16,12 +16,16 @@ import Link from "next/link";
 import { CodeView } from "@/components/code-theme";
 import { FileExplorer } from "@/components/filex-explorer";
 import { UserControl } from "@/components/user-control";
+import { useAuth } from "@clerk/nextjs";
 
 interface Props {
   projectId: string;
 }
 
 const ProjectView = ({ projectId }: Props) => {
+  const { has } = useAuth();
+  const hasPro = has?.({ plan: "pro" });
+
   const [activeFragment, setActiveFragment] = useState<Fragment | null>(null);
   const [tabState, setTabState] = useState<"preview" | "code">("preview");
   return (
@@ -61,11 +65,13 @@ const ProjectView = ({ projectId }: Props) => {
                 </TabsTrigger>
               </TabsList>
               <div className="ml-auto flex items-center gap-x-2">
-                <Button asChild size={"sm"} variant={"tertiary"}>
-                  <Link href={"/pricing"}>
-                    <CrownIcon /> Upgrade
-                  </Link>
-                </Button>
+                {!hasPro && (
+                  <Button asChild size={"sm"} variant={"tertiary"}>
+                    <Link href={"/pricing"}>
+                      <CrownIcon /> Upgrade
+                    </Link>
+                  </Button>
+                )}
                 <UserControl />
               </div>
             </div>
