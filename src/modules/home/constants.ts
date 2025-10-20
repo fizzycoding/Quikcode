@@ -18,12 +18,6 @@ export const PROJECT_TEMPLATES = [
       "Build a kanban board with drag-and-drop using react-beautiful-dnd and support for adding and removing tasks with local state. Use consistent spacing, column widths, and hover effects for a polished UI.",
   },
   {
-    emoji: "🗂️",
-    title: "Build a file manager",
-    prompt:
-      "Build a file manager with folder list, file grid, and options to rename or delete items using mock data and local state. Focus on spacing, clear icons, and visual distinction between folders and files.",
-  },
-  {
     emoji: "📺",
     title: "Build a YouTube clone",
     prompt:
