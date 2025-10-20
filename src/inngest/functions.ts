@@ -78,7 +78,7 @@ export const quikcode = inngest.createFunction(
       description: "Senior coding agent",
       system: PROMPT,
       model: openai({
-        model: "openai/gpt-4o-mini",
+        model: "openai/gpt-4.1",
         baseUrl: "https://openrouter.ai/api/v1",
         defaultParameters: {
           temperature: 0.1,
