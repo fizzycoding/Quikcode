@@ -6,6 +6,7 @@ import {
   type Tool,
   type Message,
   createState,
+  gemini,
 } from "@inngest/agent-kit";
 import { Sandbox } from "@e2b/code-interpreter";
 import { inngest } from "./client";
@@ -14,6 +15,20 @@ import { z } from "zod";
 import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from "@/promt";
 import { prisma } from "@/lib/db";
 import { SANDBOX_TIMEOUT } from "./consts";
+
+const MODEL_PROVIDER = process.env.MODEL_PROVIDER || "openai";
+export const getModel = () => {
+  if (MODEL_PROVIDER === "gemini") {
+    return gemini({ model: "gemini-2.5-flash" });
+  }
+  return openai({
+    model: "openai/gpt-4.1",
+    baseUrl: "https://openrouter.ai/api/v1",
+    defaultParameters: {
+      temperature: 0.1,
+    },
+  });
+};
 
 interface AgentState {
   summary: string;
@@ -77,13 +92,7 @@ export const quikcode = inngest.createFunction(
       name: "code-agent",
       description: "Senior coding agent",
       system: PROMPT,
-      model: openai({
-        model: "openai/gpt-4.1",
-        baseUrl: "https://openrouter.ai/api/v1",
-        defaultParameters: {
-          temperature: 0.1,
-        },
-      }),
+      model: getModel(),
       tools: [
         createTool({
           name: "terminal",
@@ -117,7 +126,10 @@ export const quikcode = inngest.createFunction(
 
         createTool({
           name: "createOrUpdateFiles",
-          description: `Use createOrUpdateFiles. Send JSON like: { "files": [ { "path": "app/page.tsx", "content": "\"use client\";\n<file content>" } ] } Do NOT use arrays of arrays.`,
+          description:
+            MODEL_PROVIDER === "gemini"
+              ? "Create or update code files in the sandbox."
+              : `Use createOrUpdateFiles. Send JSON like: { "files": [ { "path": "app/page.tsx", "content": "\"use client\";\n<file content>" } ] } Do NOT use arrays of arrays.`,
           parameters: z.object({
             files: z
               .array(
@@ -165,7 +177,9 @@ export const quikcode = inngest.createFunction(
         createTool({
           name: "readFiles",
           description:
-            'Read one or more files from the sandbox. Use JSON like { "files": ["app/page.tsx", "package.json"] }.',
+            MODEL_PROVIDER === "gemini"
+              ? "Read one or more files from the sandbox."
+              : 'Read one or more files from the sandbox. Use JSON like { "files": ["app/page.tsx", "package.json"] }.',
           parameters: z.object({
             files: z.array(z.string()).describe("List of file paths to read"),
           }),
@@ -224,20 +238,14 @@ export const quikcode = inngest.createFunction(
       name: "fragment-title-generator",
       description: "Title generator",
       system: FRAGMENT_TITLE_PROMPT,
-      model: openai({
-        model: "openai/gpt-4.1-nano",
-        baseUrl: "https://openrouter.ai/api/v1",
-      }),
+      model: getModel(),
     });
 
     const responseGenerator = createAgent({
       name: "response-generator",
       description: "Response generator",
       system: RESPONSE_PROMPT,
-      model: openai({
-        model: "openai/gpt-4.1-nano",
-        baseUrl: "https://openrouter.ai/api/v1",
-      }),
+      model: getModel(),
     });
 
     const { output: fragmentTitleOP } = await fragmentTitleGenerator.run(
